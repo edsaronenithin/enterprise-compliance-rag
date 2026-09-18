@@ -59,3 +59,40 @@ class DocumentRepository:
         )
 
         return self.db.scalars(statement).first()
+
+    def create_document_with_version(
+        self,
+        document: Document,
+        document_version: DocumentVersion,
+    ) -> tuple[Document, DocumentVersion]:
+
+        self.db.add(document)
+
+        self.db.flush()
+
+        document_version.document_id = document.id
+
+        self.db.add(document_version)
+
+        self.db.commit()
+
+        self.db.refresh(document)
+        self.db.refresh(document_version)
+
+        return document, document_version
+
+    def add_document(self, document: Document) -> Document:
+        self.db.add(document)
+        self.db.flush()
+        return document
+
+    def add_document_version(
+        self,
+        document_version: DocumentVersion,
+    ) -> DocumentVersion:
+        self.db.add(document_version)
+        self.db.flush()
+        return document_version
+
+    def commit(self) -> None:
+        self.db.commit()
